@@ -1,0 +1,3 @@
+[submodule "complexity"]
+	path = complexity
+	url = https://github.com/prise-3d/scenes-complexity.git
