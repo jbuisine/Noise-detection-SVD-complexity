@@ -163,7 +163,7 @@ def main():
         results_filename = os.path.join(config.output_results_folder, os.path.split(p_data)[1])
         with open(results_filename, 'a') as f:
             f.write(
-                '{};{};{};{};{};{};{};{}'
+                '{};{};{};{};{};{};{};{}\n'
                 .format(final_df_train_size, 
                     final_df_test_size, 
                     train_accuracy, 

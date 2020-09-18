@@ -8,14 +8,12 @@ import sklearn.svm as svm
 
 def _get_best_model(X_train, y_train):
 
-    # Cs = [0.001, 0.01, 0.1, 1, 10, 100, 1000]
-    # gammas = [0.001, 0.01, 0.1, 1, 5, 10, 100]
-    Cs = [0.001, 10, 100, 1000]
-    gammas = [0.001, 5, 10, 100]
+    Cs = [0.001, 0.01, 0.1, 1, 10, 100, 1000]
+    gammas = [0.001, 0.01, 0.1, 1, 5, 10, 100]
     param_grid = {'kernel':['rbf'], 'C': Cs, 'gamma' : gammas}
 
     svc = svm.SVC(probability=True, class_weight='balanced')
-    clf = GridSearchCV(svc, param_grid, cv=3, scoring='accuracy', verbose=10)
+    clf = GridSearchCV(svc, param_grid, cv=10, scoring='roc_auc', verbose=10)
 
     clf.fit(X_train, y_train)
 
