@@ -103,64 +103,65 @@ def main():
     # 4. extract data
     for scene in sorted(scenes):
 
-        print('\nBuilding data for scene: {}'.format(scene))
-        scene_path = os.path.join(p_data, scene)
+        if scene in selected_zones:
+            print('\nBuilding data for scene: {}'.format(scene))
+            scene_path = os.path.join(p_data, scene)
 
-        images = sorted(os.listdir(scene_path))
-        images_path = [ os.path.join(scene_path, img) for img in images if '.png' in img ]
+            images = sorted(os.listdir(scene_path))
+            images_path = [ os.path.join(scene_path, img) for img in images if '.png' in img ]
 
-        # get first image and for each zone associate label using kmeans
-        img = Image.open(images_path[0])
-        blocks = segmentation.divide_in_blocks(img, (200, 200))
+            # get first image and for each zone associate label using kmeans
+            img = Image.open(images_path[0])
+            blocks = segmentation.divide_in_blocks(img, (200, 200))
 
-        zones_label_cluster = []
-        for b in blocks:
-            data = estimate(p_estimator, b)
-            label = kmeans.predict(data.reshape(1, -1))[0]
-            zones_label_cluster.append(label)
+            zones_label_cluster = []
+            for b in blocks:
+                data = estimate(p_estimator, b)
+                label = kmeans.predict(data.reshape(1, -1))[0]
+                zones_label_cluster.append(label)
 
-        n_images = len(images_path)
-        # now associate data with cluster per zone and write into new data file
-        for img_index, image in enumerate(images_path):
+            n_images = len(images_path)
+            # now associate data with cluster per zone and write into new data file
+            for img_index, image in enumerate(images_path):
 
-            img_data = Image.open(image)
-            blocks = segmentation.divide_in_blocks(img_data, (200, 200))
+                img_data = Image.open(image)
+                blocks = segmentation.divide_in_blocks(img_data, (200, 200))
 
-            samples_number = int(image.split('_')[-1].replace('.png', ''))
+                samples_number = int(image.split('_')[-1].replace('.png', ''))
 
-            for index, b in enumerate(blocks):
-                
-                # find classification label
-                threshold = human_thresholds[scene][index]
+                for index, b in enumerate(blocks):
+                    
+                    # find classification label
+                    threshold = human_thresholds[scene][index]
 
-                if samples_number > threshold:
-                    input_label = 1
-                else:
-                    input_label = 0
+                    if samples_number > threshold:
+                        input_label = 1
+                    else:
+                        input_label = 0
 
-                # compute data
-                input_data = get_features(p_feature, b)
+                    # compute data
+                    input_data = get_features(p_feature, b)
 
-                if p_mode == 'svdn':
-                    input_data = utils.normalize_arr_with_range(input_data)
+                    if p_mode == 'svdn':
+                        input_data = utils.normalize_arr_with_range(input_data)
 
-                # compute input line
-                line = str(input_label)
+                    # compute input line
+                    line = str(input_label)
 
-                for value in input_data:
-                    line += ';' + str(value)
+                    for value in input_data:
+                        line += ';' + str(value)
 
-                line += '\n'
+                    line += '\n'
 
-                if index in selected_zones[scene]:
-                    with open(output_cluster_filename.format(zones_label_cluster[index], 'train'), 'a') as f:
-                        f.write(line)
-                else:
-                    with open(output_cluster_filename.format(zones_label_cluster[index], 'test'), 'a') as f:
-                        f.write(line)
+                    if index in selected_zones[scene]:
+                        with open(output_cluster_filename.format(zones_label_cluster[index], 'train'), 'a') as f:
+                            f.write(line)
+                    else:
+                        with open(output_cluster_filename.format(zones_label_cluster[index], 'test'), 'a') as f:
+                            f.write(line)
 
-                write_progress((img_index + 1) / n_images)
-        
+                    write_progress((img_index + 1) / n_images)
+            
 
             
 
